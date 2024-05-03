@@ -6,16 +6,11 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 views/public.py - All public facing views, eg non-staff (no authentication
                   required) views.
 """
+from urllib.parse import quote
 from django.core.exceptions import ObjectDoesNotExist
-try:
-    # Django 2.0+
-    from django.urls import reverse
-except ImportError:
-    # Django < 2
-    from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
-from django.utils.http import urlquote
 from django.utils.translation import gettext as _
 from django.conf import settings
 
@@ -54,7 +49,7 @@ def homepage(request):
                     return HttpResponseRedirect('%s?ticket=%s&email=%s' % (
                         reverse('helpdesk:public_view'),
                         ticket.ticket_for_url,
-                        urlquote(ticket.submitter_email))
+                        quote(ticket.submitter_email))
                     )
                 except ValueError:
                     # if someone enters a non-int string for the ticket
