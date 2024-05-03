@@ -6,4 +6,3 @@ beautifulsoup4
 lxml
 simplejson
 pytz
-six

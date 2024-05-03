@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 from helpdesk.models import Queue, Ticket, TicketCC, FollowUp, Attachment
 from django.test import TestCase
 from django.core.management import call_command
-from django.utils import six
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
@@ -14,17 +13,10 @@ from shutil import rmtree
 import sys
 from tempfile import mkdtemp
 
-try:  # python 3
-    from urllib.parse import urlparse
-except ImportError:  # python 2
-    from urlparse import urlparse
+from urllib.parse import urlparse
 
-try:
-    # Python >= 3.3
-    from unittest import mock
-except ImportError:
-    # Python < 3.3
-    import mock
+from unittest import mock
+
 
 # class A addresses can't have first octet of 0
 unrouted_socks_server = "0.0.0.1"
@@ -100,7 +92,7 @@ class GetEmailParametricTemplate(object):
             if self.method == 'local':
                 with mock.patch('helpdesk.management.commands.get_email.listdir') as mocked_listdir, \
                         mock.patch('helpdesk.management.commands.get_email.isfile') as mocked_isfile, \
-                        mock.patch('builtins.open' if six.PY3 else '__builtin__.open', mock.mock_open(read_data=test_email)):
+                        mock.patch('builtins.open', mock.mock_open(read_data=test_email)):
                     mocked_isfile.return_value = True
                     mocked_listdir.return_value = ['filename1', 'filename2']
 
@@ -171,7 +163,7 @@ class GetEmailParametricTemplate(object):
             if self.method == 'local':
                 with mock.patch('helpdesk.management.commands.get_email.listdir') as mocked_listdir, \
                         mock.patch('helpdesk.management.commands.get_email.isfile') as mocked_isfile, \
-                        mock.patch('builtins.open' if six.PY3 else '__builtin__.open', mock.mock_open(read_data=test_email)):
+                        mock.patch('builtins.open', mock.mock_open(read_data=test_email)):
                     mocked_isfile.return_value = True
                     mocked_listdir.return_value = ['filename1', 'filename2']
 
@@ -246,7 +238,7 @@ class GetEmailParametricTemplate(object):
             if self.method == 'local':
                 with mock.patch('helpdesk.management.commands.get_email.listdir') as mocked_listdir, \
                         mock.patch('helpdesk.management.commands.get_email.isfile') as mocked_isfile, \
-                        mock.patch('builtins.open' if six.PY3 else '__builtin__.open', mock.mock_open(read_data=test_email)):
+                        mock.patch('builtins.open', mock.mock_open(read_data=test_email)):
                     mocked_isfile.return_value = True
                     mocked_listdir.return_value = ['filename1', 'filename2']
 
@@ -359,7 +351,7 @@ class GetEmailParametricTemplate(object):
             if self.method == 'local':
                 with mock.patch('helpdesk.management.commands.get_email.listdir') as mocked_listdir, \
                         mock.patch('helpdesk.management.commands.get_email.isfile') as mocked_isfile, \
-                        mock.patch('builtins.open' if six.PY3 else '__builtin__.open', mock.mock_open(read_data=msg.as_string())):
+                        mock.patch('builtins.open', mock.mock_open(read_data=msg.as_string())):
                     mocked_isfile.return_value = True
                     mocked_listdir.return_value = ['filename1', 'filename2']
 
@@ -606,7 +598,7 @@ a9eiiQ+3V1v+7wWHXCzq
             if self.method == 'local':
                 with mock.patch('helpdesk.management.commands.get_email.listdir') as mocked_listdir, \
                         mock.patch('helpdesk.management.commands.get_email.isfile') as mocked_isfile, \
-                        mock.patch('builtins.open' if six.PY3 else '__builtin__.open', mock.mock_open(read_data=test_email)):
+                        mock.patch('builtins.open', mock.mock_open(read_data=test_email)):
                     mocked_isfile.return_value = True
                     mocked_listdir.return_value = ['filename1']
 
@@ -776,7 +768,7 @@ class GetEmailCCHandling(TestCase):
 
         with mock.patch('helpdesk.management.commands.get_email.listdir') as mocked_listdir, \
                 mock.patch('helpdesk.management.commands.get_email.isfile') as mocked_isfile, \
-                mock.patch('builtins.open' if six.PY3 else '__builtin__.open', mock.mock_open(read_data=test_email)):
+                mock.patch('builtins.open', mock.mock_open(read_data=test_email)):
 
             mocked_isfile.return_value = True
             mocked_listdir.return_value = ['filename1']

@@ -38,7 +38,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management.base import BaseCommand
 from django.db.models import Q
 from django.utils.translation import gettext as _
-from django.utils import encoding, six, timezone
+from django.utils import encoding, timezone
 
 from helpdesk import settings
 from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments
@@ -148,8 +148,6 @@ def process_queue(q, logger):
                                 addr=q.socks_proxy_host,
                                 port=q.socks_proxy_port)
         socket.socket = socks.socksocket
-    elif six.PY2:
-        socket.socket = socket._socketobject
 
     email_box_type = settings.QUEUE_EMAIL_BOX_TYPE or q.email_box_type
 
@@ -177,7 +175,7 @@ def process_queue(q, logger):
         logger.info("Received %d messages from POP3 server" % len(messagesInfo))
 
         for msgRaw in messagesInfo:
-            if six.PY3 and type(msgRaw) is bytes:
+            if type(msgRaw) is bytes:
                 # in py3, msgRaw may be a bytes object, decode to str
                 try:
                     msg = msgRaw.decode("utf-8")
@@ -190,14 +188,11 @@ def process_queue(q, logger):
             msgNum = msg.split(" ")[0]
             logger.info("Processing message %s" % msgNum)
 
-            if six.PY2:
-                full_message = encoding.force_text("\n".join(server.retr(msgNum)[1]), errors='replace')
+            raw_content = server.retr(msgNum)[1]
+            if type(raw_content[0]) is bytes:
+                full_message = "\n".join([elm.decode('utf-8') for elm in raw_content])
             else:
-                raw_content = server.retr(msgNum)[1]
-                if type(raw_content[0]) is bytes:
-                    full_message = "\n".join([elm.decode('utf-8') for elm in raw_content])
-                else:
-                    full_message = encoding.force_text("\n".join(raw_content), errors='replace')
+                full_message = encoding.force_text("\n".join(raw_content), errors='replace')
             ticket = ticket_from_message(message=full_message, queue=q, logger=logger)
 
             if ticket:
@@ -288,35 +283,24 @@ def process_queue(q, logger):
 
 
 def decodeUnknown(charset, string):
-    if six.PY2:
+    if type(string) is not str:
         if not charset:
             try:
-                return string.decode('utf-8', 'replace')
+                return str(string, encoding='utf-8', errors='replace')
             except UnicodeError:
-                return string.decode('iso8859-1', 'replace')
-        return unicode(string, charset)
-    elif six.PY3:
-        if type(string) is not str:
-            if not charset:
-                try:
-                    return str(string, encoding='utf-8', errors='replace')
-                except UnicodeError:
-                    return str(string, encoding='iso8859-1', errors='replace')
-            return str(string, encoding=charset, errors='replace')
-        return string
+                return str(string, encoding='iso8859-1', errors='replace')
+        return str(string, encoding=charset, errors='replace')
+    return string
 
 
 def decode_mail_headers(string):
-    decoded = email.header.decode_header(string) if six.PY3 else email.header.decode_header(string.encode('utf-8'))
-    if six.PY2:
-        return u' '.join([unicode(msg, charset or 'utf-8') for msg, charset in decoded])
-    elif six.PY3:
-        return u' '.join([str(msg, encoding=charset, errors='replace') if charset else str(msg) for msg, charset in decoded])
+    decoded = email.header.decode_header(string)
+    return u' '.join([str(msg, encoding=charset, errors='replace') if charset else str(msg) for msg, charset in decoded])
 
 
 def ticket_from_message(message, queue, logger):
     # 'message' must be an RFC822 formatted message.
-    message = email.message_from_string(message) if six.PY3 else email.message_from_string(message.encode('utf-8'))
+    message = email.message_from_string(message)
     subject = message.get('subject', _('Comment from e-mail'))
     subject = decode_mail_headers(decodeUnknown(message.get_charset(), subject))
     for affix in STRIPPED_SUBJECT_STRINGS:
@@ -398,16 +382,10 @@ def ticket_from_message(message, queue, logger):
                 payload = payload.pop().as_string()
             payloadToWrite = payload
             # check version of python to ensure use of only the correct error type
-            if six.PY2:
-                non_b64_err = binascii.Error
-            else:
-                non_b64_err = TypeError
+            non_b64_err = TypeError
             try:
                 logger.debug("Try to base64 decode the attachment payload")
-                if six.PY2:
-                    payloadToWrite = base64.decodestring(payload)
-                else:
-                    payloadToWrite = base64.decodebytes(payload)
+                payloadToWrite = base64.decodebytes(payload)
             except non_b64_err:
                 logger.debug("Payload was not base64 encoded, using raw bytes")
                 payloadToWrite = payload
@@ -511,10 +489,7 @@ def ticket_from_message(message, queue, logger):
     f.save()
     logger.debug("Created new FollowUp for Ticket")
 
-    if six.PY2:
-        logger.info(("[%s-%s] %s" % (t.queue.slug, t.id, t.title,)).encode('ascii', 'replace'))
-    elif six.PY3:
-        logger.info("[%s-%s] %s" % (t.queue.slug, t.id, t.title,))
+    logger.info("[%s-%s] %s" % (t.queue.slug, t.id, t.title,))
 
     attached = process_attachments(f, files)
     for att_file in attached:

@@ -14,7 +14,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
-from django.utils import six
 from django.utils.translation import gettext_lazy as _, gettext
 from django.utils.encoding import python_2_unicode_compatible
 import re
@@ -1195,10 +1194,7 @@ class UserSettings(models.Model):
         except ImportError:
             import cPickle as pickle
         from helpdesk.lib import b64encode
-        if six.PY2:
-            self.settings_pickled = b64encode(pickle.dumps(data))
-        else:
-            self.settings_pickled = b64encode(pickle.dumps(data)).decode()
+        self.settings_pickled = b64encode(pickle.dumps(data)).decode()
 
     def _get_settings(self):
         # return a python dictionary representing the pickled data.
@@ -1208,10 +1204,7 @@ class UserSettings(models.Model):
             import cPickle as pickle
         from helpdesk.lib import b64decode
         try:
-            if six.PY2:
-                return pickle.loads(b64decode(str(self.settings_pickled)))
-            else:
-                return pickle.loads(b64decode(self.settings_pickled.encode('utf-8')))
+            return pickle.loads(b64decode(self.settings_pickled.encode('utf-8')))
         except pickle.UnpicklingError:
             return {}
 
@@ -1484,7 +1477,7 @@ class CustomField(models.Model):
     )
 
     def _choices_as_array(self):
-        from django.utils.six import StringIO
+        from io import StringIO
         valuebuffer = StringIO(self.list_values)
         choices = [[item.strip(), item.strip()] for item in valuebuffer.readlines()]
         valuebuffer.close()
