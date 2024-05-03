@@ -59,10 +59,7 @@ Usage example::
 
 
 import os
-try:
-    from urllib import urlencode  # python2
-except ImportError:
-    from urllib.parse import urlencode  # python3
+from urllib.parse import urlencode  # python3
 
 import socket
 if hasattr(socket, 'setdefaulttimeout'):
