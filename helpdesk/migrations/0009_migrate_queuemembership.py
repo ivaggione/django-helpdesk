@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import migrations
 from django.db.utils import IntegrityError
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 
 def create_and_assign_permissions(apps, schema_editor):
