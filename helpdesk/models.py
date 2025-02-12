@@ -539,6 +539,32 @@ class Ticket(models.Model):
         verbose_name=_('Signed by'),
     )
 
+    # COMS events fields
+
+    event_date = models.DateTimeField(
+        blank=True,
+        null=True
+    )
+
+    event_staff = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name='events_part_of',
+        blank=True,
+        verbose_name=_('Event staff'),
+    )
+
+    staff_attending = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name='events_attending',
+        blank=True,
+        verbose_name=_('Staff attending'),
+    )
+
+    documents = models.FileField(
+        null=True,
+        blank=True
+    )
+
     def _get_assigned_to(self):
         """ Custom property to allow us to easily print 'Unassigned' if a
         ticket has no owner, or the users name if it's assigned. If the user
