@@ -541,7 +541,7 @@ class Ticket(models.Model):
 
     # COMS events fields
 
-    event_date = models.DateTimeField(
+    event_date = models.DateField(
         blank=True,
         null=True
     )
@@ -561,6 +561,16 @@ class Ticket(models.Model):
     )
 
     documents = models.FileField(
+        null=True,
+        blank=True
+    )
+
+    starting_time = models.TimeField(
+        null=True,
+        blank=True
+    )
+
+    ending_time = models.TimeField(
         null=True,
         blank=True
     )
