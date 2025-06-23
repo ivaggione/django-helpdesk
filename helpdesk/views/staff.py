@@ -468,7 +468,7 @@ def update_ticket(request, ticket_id, public=False):
     # render the neutralized template
     comment = template_func(comment).render(context)
 
-    if owner is -1 and ticket.assigned_to:
+    if owner == -1 and ticket.assigned_to:
         owner = ticket.assigned_to.id
 
     f = FollowUp(ticket=ticket, date=timezone.now(), comment=comment)
