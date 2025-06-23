@@ -37,7 +37,7 @@ urlpatterns = [
 
     path('tickets/', staff.ticket_list, name='list'),
     path('tickets/update/', staff.mass_update, name='mass_update'),
-    path('tickets/submit/$', staff.create_ticket, name='submit'),
+    path('tickets/submit/', staff.create_ticket, name='submit'),
     re_path(r'^tickets/(?P<ticket_id>[0-9]+)/$', staff.view_ticket, name='view'),
     re_path(r'^tickets/(?P<ticket_id>[0-9]+)/followup_edit/(?P<followup_id>[0-9]+)/$', staff.followup_edit, name='followup_edit'),
     re_path(r'^tickets/(?P<ticket_id>[0-9]+)/followup_delete/(?P<followup_id>[0-9]+)/$', staff.followup_delete, name='followup_delete'),
